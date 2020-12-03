@@ -10,6 +10,9 @@ import java.util.List;
 
 @Entity
 public class Question extends AbstractEntity {
+    public static String NO_AUTH_OF_DELETE_MESSAGE = "질문을 삭제할 권한이 없습니다.";
+    public static String ALONG_WITH_ANSWERS_OF_OTHERS_MESSAGE = "다른 사람이 쓴 답변이 있어 삭제할 수 없습니다.";
+
     @Column(length = 100, nullable = false)
     private String title;
 
@@ -27,8 +30,7 @@ public class Question extends AbstractEntity {
 
     private boolean deleted = false;
 
-    public Question() {
-    }
+    public Question() { }
 
     public Question(String title, String contents) {
         this.title = title;
@@ -63,9 +65,30 @@ public class Question extends AbstractEntity {
         return writer;
     }
 
+    private boolean isOwner(User loginUser) {
+        return writer.equals(loginUser);
+    }
+
+    private void validateAuthOfDeletion(boolean isOwner) throws CannotDeleteException {
+        if (!isOwner) {
+            throw new CannotDeleteException(NO_AUTH_OF_DELETE_MESSAGE);
+        }
+    }
+
+    private void validateAnswersOfDeletion(boolean isOwner) throws CannotDeleteException {
+        if (!isOwner) {
+            throw new CannotDeleteException(ALONG_WITH_ANSWERS_OF_OTHERS_MESSAGE);
+        }
+    }
+
     public void delete(User loginUser) throws CannotDeleteException {
-        Validator.validateDeleteAuth(isOwner(loginUser));
+        validateAuthOfDeletion(isOwner(loginUser));
+
+        for (Answer answer : answers) {
+            validateAnswersOfDeletion(answer.isOwner(loginUser));
+        }
 //        setDeleted(true);
+
     }
 
     public Question writeBy(User loginUser) {
@@ -78,9 +101,7 @@ public class Question extends AbstractEntity {
         answers.add(answer);
     }
 
-    public boolean isOwner(User loginUser) {
-        return writer.equals(loginUser);
-    }
+
 
     public Question setDeleted(boolean deleted) {
         this.deleted = deleted;
