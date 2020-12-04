@@ -1,6 +1,7 @@
 package qna.domain;
 
 import org.junit.jupiter.api.Test;
+import qna.NotFoundException;
 import qna.UnAuthorizedException;
 
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
@@ -14,6 +15,12 @@ public class AnswerTest {
     void validateAuth() {
         assertThatExceptionOfType(UnAuthorizedException.class)
                 .isThrownBy(() -> new Answer(null, QuestionTest.Q1, "Answers Contents1"));
+    }
+
+    @Test
+    void validateExistenceOfQuestion() {
+        assertThatExceptionOfType(NotFoundException.class)
+                .isThrownBy(() -> new Answer(UserTest.JAVAJIGI, null, "test"));
     }
 
 }

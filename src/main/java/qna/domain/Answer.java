@@ -20,7 +20,8 @@ public class Answer extends AbstractEntity {
 
     private boolean deleted = false;
 
-    public Answer() { }
+    public Answer() {
+    }
 
     public Answer(User writer, Question question, String contents) {
         this(null, writer, question, contents);
@@ -30,10 +31,7 @@ public class Answer extends AbstractEntity {
         super(id);
 
         validateAuth(writer);
-
-        if(question == null) {
-            throw new NotFoundException();
-        }
+        validateExistenceOfQuestion(question);
 
         this.writer = writer;
         this.question = question;
@@ -41,8 +39,14 @@ public class Answer extends AbstractEntity {
     }
 
     private void validateAuth(User writer) {
-        if(writer == null) {
+        if (writer == null) {
             throw new UnAuthorizedException();
+        }
+    }
+
+    private void validateExistenceOfQuestion(Question question) {
+        if (question == null) {
+            throw new NotFoundException();
         }
     }
 
