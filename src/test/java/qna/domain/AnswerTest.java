@@ -1,9 +1,15 @@
 package qna.domain;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import qna.NotFoundException;
 import qna.UnAuthorizedException;
 
+import java.util.stream.Stream;
+
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 public class AnswerTest {
@@ -23,4 +29,16 @@ public class AnswerTest {
                 .isThrownBy(() -> new Answer(UserTest.JAVAJIGI, null, "test"));
     }
 
+    private static Stream<Arguments> provideAnswerAndOwnerResult() {
+        return Stream.of(
+                Arguments.of(A1, UserTest.JAVAJIGI, true),
+                Arguments.of(A2, UserTest.JAVAJIGI, false)
+        );
+    }
+
+    @ParameterizedTest
+    @MethodSource("provideAnswerAndOwnerResult")
+    void isOwner(Answer answer, User owner, boolean expect) {
+        assertThat(answer.isOwner(owner)).isEqualTo(expect);
+    }
 }
