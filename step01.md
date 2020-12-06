@@ -1,3 +1,10 @@
+## 후기
+코드 구조를 다른 분들을 것을 참고하였습니다.
+
+- Answers : https://github.com/next-step/java-bowling/pull/200/files
+- @Embeddable : https://galid1.tistory.com/592
+
+
 ## 질문 삭제하기 요구사항
 - [x] 질문 데이터를 완전히 삭제하는 것이 아니라 데이터의 상태를 삭제 상태(deleted - boolean type)로 변경한다.
 - [ ] 로그인 사용자와 질문한 사람이 같은 경우 삭제 가능하다.
