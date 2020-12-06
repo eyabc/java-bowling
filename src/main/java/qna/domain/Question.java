@@ -1,12 +1,8 @@
 package qna.domain;
 
-import org.hibernate.annotations.Where;
 import qna.CannotDeleteException;
-import qna.Validator;
 
 import javax.persistence.*;
-import java.util.ArrayList;
-import java.util.List;
 
 @Entity
 public class Question extends AbstractEntity {
@@ -23,10 +19,7 @@ public class Question extends AbstractEntity {
     @JoinColumn(foreignKey = @ForeignKey(name = "fk_question_writer"))
     private User writer;
 
-    @OneToMany(mappedBy = "question", cascade = CascadeType.ALL)
-    @Where(clause = "deleted = false")
-    @OrderBy("id ASC")
-    private List<Answer> answers = new ArrayList<>();
+    private final Answers answers = new Answers();
 
     private boolean deleted = false;
 
@@ -65,30 +58,23 @@ public class Question extends AbstractEntity {
         return writer;
     }
 
-    private boolean isOwner(User loginUser) {
-        return writer.equals(loginUser);
-    }
-
     private void validateAuthOfDeletion(boolean isOwner) throws CannotDeleteException {
         if (!isOwner) {
             throw new CannotDeleteException(NO_AUTH_OF_DELETE_MESSAGE);
         }
     }
 
-    private void validateAnswersOfDeletion(boolean isOwner) throws CannotDeleteException {
-        if (!isOwner) {
+    private void validateWriterOfDeletion(boolean isWroteByOwnerAll) throws CannotDeleteException {
+        if (!isWroteByOwnerAll) {
             throw new CannotDeleteException(ALONG_WITH_ANSWERS_OF_OTHERS_MESSAGE);
         }
     }
 
     public void delete(User loginUser) throws CannotDeleteException {
-        validateAuthOfDeletion(isOwner(loginUser));
+        validateAuthOfDeletion(writer.equals(loginUser));
+        validateWriterOfDeletion(answers.isWroteByOwnerAll(writer));
 
-        for (Answer answer : answers) {
-            validateAnswersOfDeletion(answer.isOwner(loginUser));
-        }
-//        setDeleted(true);
-
+        setDeleted(true);
     }
 
     public Question writeBy(User loginUser) {
@@ -98,10 +84,8 @@ public class Question extends AbstractEntity {
 
     public void addAnswer(Answer answer) {
         answer.toQuestion(this);
-        answers.add(answer);
+//        answers.add(answer);
     }
-
-
 
     public Question setDeleted(boolean deleted) {
         this.deleted = deleted;
@@ -110,10 +94,6 @@ public class Question extends AbstractEntity {
 
     public boolean isDeleted() {
         return deleted;
-    }
-
-    public List<Answer> getAnswers() {
-        return answers;
     }
 
     @Override
